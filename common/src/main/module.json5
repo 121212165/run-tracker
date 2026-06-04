@@ -1,0 +1,9 @@
+{
+  "module": {
+    "name": "common",
+    "type": "shared",
+    "description": "共享数据模型和服务",
+    "deviceTypes": ["phone", "tablet", "wearable"],
+    "deliveryWithInstall": true
+  }
+}

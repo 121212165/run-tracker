@@ -1,0 +1,3 @@
+{
+  "src": ["pages/Index", "pages/SportSelectPage", "pages/RunningDataPage", "pages/RunningHeartPage", "pages/RunningTimerPage", "pages/RunResultPage"]
+}

@@ -1,0 +1,913 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RunTracker 测试文档</title>
+<style>
+  :root {
+    --brand: #E8453C;
+    --brand-light: #FDE8E7;
+    --bg: #FAFAFA;
+    --card: #FFFFFF;
+    --text: #1A1A1A;
+    --text2: #6B7280;
+    --text3: #9CA3AF;
+    --border: #E4E7EC;
+    --success: #22C55E;
+    --warning: #EAB308;
+    --error: #E8453C;
+    --radius: 12px;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+  }
+
+  /* Header */
+  .header {
+    background: linear-gradient(135deg, #1A1A1A 0%, #2D2D2D 100%);
+    color: #fff;
+    padding: 48px 24px 40px;
+    text-align: center;
+  }
+  .header h1 { font-size: 28px; font-weight: 700; letter-spacing: 1px; }
+  .header .subtitle { color: #9CA3AF; margin-top: 8px; font-size: 14px; }
+  .header .meta {
+    display: flex; justify-content: center; gap: 24px; margin-top: 16px;
+    font-size: 12px; color: #6B7280;
+  }
+  .header .meta span { display: flex; align-items: center; gap: 4px; }
+  .header .dot { width: 8px; height: 8px; border-radius: 50%; }
+
+  /* Nav */
+  .nav {
+    position: sticky; top: 0; z-index: 100;
+    background: var(--card);
+    border-bottom: 1px solid var(--border);
+    display: flex; gap: 0; overflow-x: auto;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .nav a {
+    padding: 14px 20px;
+    font-size: 13px; font-weight: 500;
+    color: var(--text2);
+    text-decoration: none;
+    white-space: nowrap;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+  }
+  .nav a:hover { color: var(--brand); border-bottom-color: var(--brand); }
+
+  /* Main */
+  .main { max-width: 960px; margin: 0 auto; padding: 24px 16px; }
+
+  /* Section */
+  .section {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    margin-bottom: 20px;
+    overflow: hidden;
+  }
+  .section-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 10px;
+  }
+  .section-header .icon {
+    width: 32px; height: 32px; border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; color: #fff;
+  }
+  .section-header h2 { font-size: 16px; font-weight: 600; }
+  .section-header .count {
+    margin-left: auto;
+    background: var(--brand-light);
+    color: var(--brand);
+    font-size: 11px; font-weight: 600;
+    padding: 2px 8px; border-radius: 10px;
+  }
+
+  /* Summary Cards */
+  .summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 12px;
+    padding: 20px;
+  }
+  .summary-card {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px;
+    text-align: center;
+  }
+  .summary-card .num { font-size: 28px; font-weight: 700; }
+  .summary-card .label { font-size: 12px; color: var(--text2); margin-top: 4px; }
+
+  /* File Block */
+  .file-block {
+    border-bottom: 1px solid var(--border);
+    padding: 16px 20px;
+  }
+  .file-block:last-child { border-bottom: none; }
+  .file-header {
+    display: flex; align-items: center; gap: 8px;
+    margin-bottom: 12px;
+  }
+  .file-path {
+    font-family: 'SF Mono', 'Consolas', monospace;
+    font-size: 12px; color: var(--text2);
+    background: var(--bg);
+    padding: 2px 8px; border-radius: 4px;
+  }
+  .file-name { font-size: 14px; font-weight: 600; }
+  .badge {
+    font-size: 10px; font-weight: 600;
+    padding: 2px 6px; border-radius: 4px;
+    text-transform: uppercase;
+  }
+  .badge-page { background: #E0E7FF; color: #4338CA; }
+  .badge-comp { background: #D1FAE5; color: #065F46; }
+  .badge-vm { background: #FEF3C7; color: #92400E; }
+  .badge-model { background: #FCE7F3; color: #9D174D; }
+
+  /* Test Case Table */
+  .test-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  .test-table th {
+    background: var(--bg);
+    padding: 8px 12px;
+    text-align: left;
+    font-weight: 600;
+    font-size: 11px;
+    color: var(--text2);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 1px solid var(--border);
+  }
+  .test-table td {
+    padding: 8px 12px;
+    border-bottom: 1px solid #F3F4F6;
+    vertical-align: top;
+  }
+  .test-table tr:last-child td { border-bottom: none; }
+  .test-table tr:hover { background: #FAFAFA; }
+
+  /* Priority badges */
+  .p-high { color: var(--error); font-weight: 600; }
+  .p-mid { color: var(--warning); font-weight: 600; }
+  .p-low { color: var(--text3); }
+
+  /* Category tags */
+  .tag {
+    display: inline-block;
+    font-size: 10px;
+    padding: 1px 6px;
+    border-radius: 3px;
+    margin-right: 4px;
+    font-weight: 500;
+  }
+  .tag-func { background: #DBEAFE; color: #1E40AF; }
+  .tag-ui { background: #F3E8FF; color: #6B21A8; }
+  .tag-interact { background: #FEF3C7; color: #92400E; }
+  .tag-data { background: #D1FAE5; color: #065F46; }
+  .tag-state { background: #FFE4E6; color: #9F1239; }
+  .tag-nav { background: #E0E7FF; color: #4338CA; }
+  .tag-perf { background: #FCE7F3; color: #9D174D; }
+  .tag-a11y { background: #CCFBF1; color: #115E59; }
+
+  /* Checklist */
+  .checklist { list-style: none; padding: 0; }
+  .checklist li {
+    padding: 6px 0;
+    display: flex; align-items: flex-start; gap: 8px;
+    font-size: 13px;
+  }
+  .checklist li input[type="checkbox"] {
+    margin-top: 3px;
+    accent-color: var(--brand);
+  }
+
+  /* Progress bar */
+  .progress-bar {
+    height: 6px; background: var(--border); border-radius: 3px;
+    overflow: hidden; margin-top: 8px;
+  }
+  .progress-fill {
+    height: 100%; border-radius: 3px;
+    background: linear-gradient(90deg, var(--brand), #F97316);
+    transition: width 0.3s;
+  }
+
+  /* Stat row */
+  .stat-row {
+    display: flex; gap: 24px; padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+  }
+  .stat-row .stat-label { color: var(--text2); min-width: 80px; }
+  .stat-row .stat-value { font-weight: 600; }
+
+  /* Print */
+  @media print {
+    .nav { display: none; }
+    .section { break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="header">
+  <h1>🏃 RunTracker 测试文档</h1>
+  <div class="subtitle">鸿蒙跑步记录与追踪工具 — 全模块测试用例</div>
+  <div class="meta">
+    <span><div class="dot" style="background:var(--brand)"></div> 手机端 (13文件)</span>
+    <span><div class="dot" style="background:#22C55E"></div> 手表端 (8文件)</span>
+    <span><div class="dot" style="background:#EAB308"></div> 服务卡片 (2文件)</span>
+    <span>版本: v1.0</span>
+    <span>日期: 2026-06-04</span>
+  </div>
+</div>
+
+<!-- Nav -->
+<div class="nav">
+  <a href="#overview">概览</a>
+  <a href="#phone-core">手机核心</a>
+  <a href="#phone-secondary">手机二级</a>
+  <a href="#watch">手表端</a>
+  <a href="#widget">服务卡片</a>
+  <a href="#design">设计规范</a>
+  <a href="#checklist">验收清单</a>
+</div>
+
+<!-- Main -->
+<div class="main">
+
+<!-- Overview -->
+<div id="overview" class="section">
+  <div class="section-header">
+    <div class="icon" style="background:var(--brand)">📊</div>
+    <h2>测试概览</h2>
+  </div>
+  <div class="summary-grid">
+    <div class="summary-card">
+      <div class="num" style="color:var(--brand)">23</div>
+      <div class="label">源文件总数</div>
+    </div>
+    <div class="summary-card">
+      <div class="num" style="color:#4338CA">87</div>
+      <div class="label">测试用例总数</div>
+    </div>
+    <div class="summary-card">
+      <div class="num" style="color:#22C55E">4</div>
+      <div class="label">测试模块</div>
+    </div>
+    <div class="summary-card">
+      <div class="num" style="color:#EAB308">8</div>
+      <div class="label">设计规范检查项</div>
+    </div>
+  </div>
+  <div class="stat-row">
+    <span class="stat-label">手机端核心</span>
+    <span class="stat-value">7 文件 / 28 用例</span>
+  </div>
+  <div class="stat-row">
+    <span class="stat-label">手机端二级</span>
+    <span class="stat-value">6 文件 / 22 用例</span>
+  </div>
+  <div class="stat-row">
+    <span class="stat-label">手表端</span>
+    <span class="stat-value">8 文件 / 25 用例</span>
+  </div>
+  <div class="stat-row" style="border-bottom:none">
+    <span class="stat-label">服务卡片</span>
+    <span class="stat-value">2 文件 / 12 用例</span>
+  </div>
+</div>
+
+<!-- ========== PHONE CORE ========== -->
+<div id="phone-core" class="section">
+  <div class="section-header">
+    <div class="icon" style="background:#4338CA">📱</div>
+    <h2>手机端核心页面</h2>
+    <span class="count">7 文件 · 28 用例</span>
+  </div>
+
+  <!-- RunningViewModel -->
+  <div class="file-block">
+    <div class="file-header">
+      <span class="badge badge-vm">VM</span>
+      <span class="file-name">RunningViewModel.ets</span>
+      <span class="file-path">entry/src/main/ets/viewmodel/</span>
+    </div>
+    <table class="test-table">
+      <thead>
+        <tr><th style="width:40px">ID</th><th style="width:50px">优先级</th><th>测试内容</th><th style="width:70px">类型</th><th>预期结果</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>PC-01</td><td class="p-high">P0</td><td>start() 方法调用后 RunningState 切换为 running</td><td><span class="tag tag-state">状态</span></td><td>状态变为 running，计时器启动，距离/心率/配速开始模拟增长</td></tr>
+        <tr><td>PC-02</td><td class="p-high">P0</td><td>pause() 方法暂停后数据停止增长</td><td><span class="tag tag-state">状态</span></td><td>状态变为 paused，所有数值冻结不变</td></tr>
+        <tr><td>PC-03</td><td class="p-high">P0</td><td>resume() 恢复后数据继续增长</td><td><span class="tag tag-state">状态</span></td><td>状态恢复 running，数值从暂停点继续</td></tr>
+        <tr><td>PC-04</td><td class="p-high">P0</td><td>stop() 结束后生成完整 RunRecord</td><td><span class="tag tag-data">数据</span></td><td>返回包含距离/时长/配速/心率/卡路里/区间分布的完整记录</td></tr>
+        <tr><td>PC-05</td><td class="p-mid">P1</td><td>formatPace() 格式化配速显示</td><td><span class="tag tag-func">功能</span></td><td>输入 360 秒/km → 输出 "6'00″"</td></tr>
+        <tr><td>PC-06</td><td class="p-mid">P1</td><td>formatDuration() 格式化时长</td><td><span class="tag tag-func">功能</span></td><td>输入 3661 秒 → 输出 "1:01:01"</td></tr>
+        <tr><td>PC-07</td><td class="p-mid">P1</td><td>formatDistance() 格式化距离</td><td><span class="tag tag-func">功能</span></td><td>输入 5230 米 → 输出 "5.23"</td></tr>
+        <tr><td>PC-08</td><td class="p-low">P2</td><td>心率模拟值在合理范围内</td><td><span class="tag tag-data">数据</span></td><td>模拟心率在 60~190 bpm 区间波动</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- BottomTabBar -->
+  <div class="file-block">
+    <div class="file-header">
+      <span class="badge badge-comp">组件</span>
+      <span class="file-name">BottomTabBar.ets</span>
+      <span class="file-path">entry/src/main/ets/components/</span>
+    </div>
+    <table class="test-table">
+      <thead>
+        <tr><th style="width:40px">ID</th><th style="width:50px">优先级</th><th>测试内容</th><th style="width:70px">类型</th><th>预期结果</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>PC-09</td><td class="p-high">P0</td><td>4 个 Tab 均正常显示</td><td><span class="tag tag-ui">UI</span></td><td>首页/记录/分析/我的 四项可见，图标+文字完整</td></tr>
+        <tr><td>PC-10</td><td class="p-high">P0</td><td>点击 Tab 切换激活态</td><td><span class="tag tag-interact">交互</span></td><td>点击后图标文字变品牌红 #E8453C，onTabChange 回调触发</td></tr>
+        <tr><td>PC-11</td><td class="p-mid">P1</td><td>非激活 Tab 颜色为灰色</td><td><span class="tag tag-ui">UI</span></td><td>未选中 Tab 文字/图标颜色 #9CA3AF</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- HrZoneBar -->
+  <div class="file-block">
+    <div class="file-header">
+      <span class="badge badge-comp">组件</span>
+      <span class="file-name">HrZoneBar.ets</span>
+      <span class="file-path">entry/src/main/ets/components/</span>
+    </div>
+    <table class="test-table">
+      <thead>
+        <tr><th style="width:40px">ID</th><th style="width:50px">优先级</th><th>测试内容</th><th style="width:70px">类型</th><th>预期结果</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>PC-12</td><td class="p-high">P0</td><td>5 色区间按比例渲染</td><td><span class="tag tag-ui">UI</span></td><td>5段颜色 #22C55E/#84CC16/#EAB308/#F97316/#E8453C 按数据比例显示宽度</td></tr>
+        <tr><td>PC-13</td><td class="p-mid">P1</td><td>showLabels=true 显示区间名称</td><td><span class="tag tag-ui">UI</span></td><td>各区段下方显示 Z1~Z5 标签</td></tr>
+        <tr><td>PC-14</td><td class="p-mid">P1</td><td>无数据时均匀分布占位</td><td><span class="tag tag-state">状态</span></td><td>传入空数据时5段等宽显示</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- RunStatCard -->
+  <div class="file-block">
+    <div class="file-header">
+      <span class="badge badge-comp">组件</span>
+      <span class="file-name">RunStatCard.ets</span>
+      <span class="file-path">entry/src/main/ets/components/</span>
+    </div>
+    <table class="test-table">
+      <thead>
+        <tr><th style="width:40px">ID</th><th style="width:50px">优先级</th><th>测试内容</th><th style="width:70px">类型</th><th>预期结果</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>PC-15</td><td class="p-high">P0</td><td>RunStatCard 标准卡片显示完整</td><td><span class="tag tag-ui">UI</span></td><td>数值+单位+标签 3层信息完整，1px边框+12px圆角</td></tr>
+        <tr><td>PC-16</td><td class="p-high">P0</td><td>RunStatCardCompact 紧凑型无框</td><td><span class="tag tag-ui">UI</span></td><td>无边框无圆角，纯文本排列</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Index -->
+  <div class="file-block">
+    <div class="file-header">
+      <span class="badge badge-page">页面</span>
+      <span class="file-name">Index.ets</span>
+      <span class="file-path">entry/src/main/ets/pages/</span>
+    </div>
+    <table class="test-table">
+      <thead>
+        <tr><th style="width:40px">ID</th><th style="width:50px">优先级</th><th>测试内容</th><th style="width:70px">类型</th><th>预期结果</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>PC-17</td><td class="p-high">P0</td><td>问候语按时段变化</td><td><span class="tag tag-func">功能</span></td><td>上午显示"早上好"/下午"下午好"/晚上"晚上好"</td></tr>
+        <tr><td>PC-18</td><td class="p-high">P0</td><td>「开始跑步」按钮跳转 RunningPage</td><td><span class="tag tag-nav">导航</span></td><td>点击后路由跳转到跑步中页面</td></tr>
+        <tr><td>PC-19</td><td class="p-high">P0</td><td>本周目标进度条显示</td><td><span class="tag tag-ui">UI</span></td><td>品牌红进度条，显示已完成/目标公里数</td></tr>
+        <tr><td>PC-20</td><td class="p-mid">P1</td><td>3 列指标卡数据完整</td><td><span class="tag tag-data">数据</span></td><td>今日跑量/本周跑量/平均配速 均有数值和单位</td></tr>
+        <tr><td>PC-21</td><td class="p-mid">P1</td><td>最近跑步列表显示 3 条记录</td><td><span class="tag tag-data">数据</span></td><td>列表含日期/距离/配速/时长信息</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- RunningPage -->
+  <div class="file-block">
+    <div class="file-header">
+      <span class="badge badge-page">页面</span>
+      <span class="file-name">RunningPage.ets</span>
+      <span class="file-path">entry/src/main/ets/pages/</span>
+    </div>
+    <table class="test-table">
+      <thead>
+        <tr><th style="width:40px">ID</th><th style="width:50px">优先级</th><th>测试内容</th><th style="width:70px">类型</th><th>预期结果</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>PC-22</td><td class="p-high">P0</td><td>计时器 HH:MM:SS 实时更新</td><td><span class="tag tag-func">功能</span></td><td>跑步开始后计时器每秒刷新</td></tr>
+        <tr><td>PC-23</td><td class="p-high">P0</td><td>暂停按钮切换暂停/继续</td><td><span class="tag tag-interact">交互</span></td><td>点击暂停→数据冻结，再点继续→数据恢复增长</td></tr>
+        <tr><td>PC-24</td><td class="p-high">P0</td><td>结束按钮跳转结果页并传递数据</td><td><span class="tag tag-nav">导航</span></td><td>跳转 RunResultPage，record 参数包含完整跑步数据</td></tr>
+        <tr><td>PC-25</td><td class="p-mid">P1</td><td>心率颜色随区间变化</td><td><span class="tag tag-ui">UI</span></td><td>心率数字颜色对应当前所处心率区间颜色</td></tr>
+        <tr><td>PC-26</td><td class="p-mid">P1</td><td>3 列指标实时更新</td><td><span class="tag tag-data">数据</span></td><td>距离/配速/卡路里随跑步持续增长</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- RunResultPage -->
+  <div class="file-block">
+    <div class="file-header">
+      <span class="badge badge-page">页面</span>
+      <span class="file-name">RunResultPage.ets</span>
+      <span class="file-path">entry/src/main/ets/pages/</span>
+    </div>
+    <table class="test-table">
+      <thead>
+        <tr><th style="width:40px">ID</th><th style="width:50px">优先级</th><th>测试内容</th><th style="width:70px">类型</th><th>预期结果</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>PC-27</td><td class="p-high">P0</td><td>大号距离品牌红 48px 显示</td><td><span class="tag tag-ui">UI</span></td><td>距离数字 48px Bold，颜色 #E8453C</td></tr>
+        <tr><td>PC-28</td><td class="p-high">P0</td><td>保存按钮返回首页</td><td><span class="tag tag-nav">导航</span></td><td>点击保存后路由回到首页</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ========== PHONE SECONDARY ========== -->
+<div id="phone-secondary" class="section">
+  <div class="section-header">
+    <div class="icon" style="background:#6B21A8">📋</div>
+    <h2>手机端二级页面</h2>
+    <span class="count">6 文件 · 22 用例</span>
+  </div>
+
+  <!-- RunListItem -->
+  <div class="file-block">
+    <div class="file-header">
+      <span class="badge badge-comp">组件</span>
+      <span class="file-name">RunListItem.ets</span>
+      <span class="file-path">entry/src/main/ets/components/</span>
+    </div>
+    <table class="test-table">
+      <thead>
+        <tr><th style="width:40px">ID</th><th style="width:50px">优先级</th><th>测试内容</th><th style="width:70px">类型</th><th>预期结果</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>PS-01</td><td class="p-high">P0</td><td>列表项信息完整显示</td><td><span class="tag tag-ui">UI</span></td><td>日期+距离(km)+配速+时长+心率图标均可见</td></tr>
+        <tr><td>PS-02</td><td class="p-mid">P1</td><td>点击触发 onItemClick 回调</td><td><span class="tag tag-interact">交互</span></td><td>点击后回调参数包含对应记录索引</td></tr>
+        <tr><td>PS-03</td><td class="p-mid">P1</td><td>卡片圆角8px+1px边框</td><td><span class="tag tag-ui">UI</span></td><td>视觉呈现为圆角卡片，边框 #E4E7EC</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- WeekChart -->
+  <div class="file-block">
+    <div class="file-header">
+      <span class="badge badge-comp">组件</span>
+      <span class="file-name">WeekChart.ets</span>
+      <span class="file-path">entry/src/main/ets/components/</span>
+    </div>
+    <table class="test-table">
+      <thead>
+        <tr><th style="width:40px">ID</th><th style="width:50px">优先级</th><th>测试内容</th><th style="width:70px">类型</th><th>预期结果</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>PS-04</td><td class="p-high">P0</td><td>7天柱状图正确渲染</td><td><span class="tag tag-ui">UI</span></td><td>有跑量天品牌红，无跑量天灰色</td></tr>
+        <tr><td>PS-05</td><td class="p-mid">P1</td><td>柱高度自适应，最大80vp</td><td><span class="tag tag-func">功能</span></td><td>最大值对应80vp，其余按比例缩放</td></tr>
+        <tr><td>PS-06</td><td class="p-mid">P1</td><td>标题行显示周总跑量/目标</td><td><span class="tag tag-data">数据</span></td><td>标题含总公里数和目标公里数</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- TrendChart -->
+  <div class="file-block">
+    <div class="file-header">
+      <span class="badge badge-comp">组件</span>
+      <span class="file-name">TrendChart.ets</span>
+      <span class="file-path">entry/src/main/ets/components/</span>
+    </div>
+    <table class="test-table">
+      <thead>
+        <tr><th style="width:40px">ID</th><th style="width:50px">优先级</th><th>测试内容</th><th style="width:70px">类型</th><th>预期结果</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>PS-07</td><td class="p-high">P0</td><td>配速越快柱子越高</td><td><span class="tag tag-func">功能</span></td><td>配速低(快)的竖条高度 > 配速高(慢)的竖条</td></tr>
+        <tr><td>PS-08</td><td class="p-mid">P1</td><td>顶部配速值+底部日期标签</td><td><span class="tag tag-ui">UI</span></td><td>每根竖条上方显示配速值，下方显示日期</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- RecordsPage -->
+  <div class="file-block">
+    <div class="file-header">
+      <span class="badge badge-page">页面</span>
+      <span class="file-name">RecordsPage.ets</span>
+      <span class="file-path">entry/src/main/ets/pages/</span>
+    </div>
+    <table class="test-table">
+      <thead>
+        <tr><th style="width:40px">ID</th><th style="width:50px">优先级</th><th>测试内容</th><th style="width:70px">类型</th><th>预期结果</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>PS-09</td><td class="p-high">P0</td><td>周/月/全部切换功能</td><td><span class="tag tag-interact">交互</span></td><td>切换后列表内容更新，选中项品牌红下划线</td></tr>
+        <tr><td>PS-10</td><td class="p-high">P0</td><td>按周分组显示记录</td><td><span class="tag tag-data">数据</span></td><td>记录按周分组，每组有周标题</td></tr>
+        <tr><td>PS-11</td><td class="p-mid">P1</td><td>点击记录进入详情</td><td><span class="tag tag-nav">导航</span></td><td>点击列表项跳转 RecordDetailPage</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- RecordDetailPage -->
+  <div class="file-block">
+    <div class="file-header">
+      <span class="badge badge-page">页面</span>
+      <span class="file-name">RecordDetailPage.ets</span>
+      <span class="file-path">entry/src/main/ets/pages/</span>
+    </div>
+    <table class="test-table">
+      <thead>
+        <tr><th style="width:40px">ID</th><th style="width:50px">优先级</th><th>测试内容</th><th style="width:70px">类型</th><th>预期结果</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>PS-12</td><td class="p-high">P0</td><td>4 宫格数据完整</td><td><span class="tag tag-data">数据</span></td><td>用时/平均心率/最大心率/卡路里 均显示</td></tr>
+        <tr><td>PS-13</td><td class="p-high">P0</td><td>心率5区间分布横条正确</td><td><span class="tag tag-ui">UI</span></td><td>5色横条+5色标签行，比例与数据一致</td></tr>
+        <tr><td>PS-14</td><td class="p-mid">P1</td><td>分段配速柱状图最快柱品牌红</td><td><span class="tag tag-ui">UI</span></td><td>最快公里段为品牌红，其余灰色</td></tr>
+        <tr><td>PS-15</td><td class="p-mid">P1</td><td>运动类型标签显示</td><td><span class="tag tag-ui">UI</span></td><td>品牌浅红背景标签，如"户外跑"</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- AnalysisPage -->
+  <div class="file-block">
+    <div class="file-header">
+      <span class="badge badge-page">页面</span>
+      <span class="file-name">AnalysisPage.ets</span>
+      <span class="file-path">entry/src/main/ets/pages/</span>
+    </div>
+    <table class="test-table">
+      <thead>
+        <tr><th style="width:40px">ID</th><th style="width:50px">优先级</th><th>测试内容</th><th style="width:70px">类型</th><th>预期结果</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>PS-16</td><td class="p-high">P0</td><td>周跑量柱状图正确</td><td><span class="tag tag-ui">UI</span></td><td>7天柱状图，有跑量品牌红/无跑量灰色</td></tr>
+        <tr><td>PS-17</td><td class="p-high">P0</td><td>配速趋势图竖条渲染</td><td><span class="tag tag-ui">UI</span></td><td>最近10次配速趋势，配速越快越高</td></tr>
+        <tr><td>PS-18</td><td class="p-mid">P1</td><td>体能评分 Circle 进度环</td><td><span class="tag tag-ui">UI</span></td><td>72/100 进度环正确填充</td></tr>
+        <tr><td>PS-19</td><td class="p-mid">P1</td><td>训练负荷进度条指示</td><td><span class="tag tag-ui">UI</span></td><td>进度条位置对应"适中"区间</td></tr>
+        <tr><td>PS-20</td><td class="p-low">P2</td><td>VO2max 数值和等级标签</td><td><span class="tag tag-data">数据</span></td><td>显示 42.3 mL/kg/min + 等级标签</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ProfilePage -->
+  <div class="file-block">
+    <div class="file-header">
+      <span class="badge badge-page">页面</span>
+      <span class="file-name">ProfilePage.ets</span>
+      <span class="file-path">entry/src/main/ets/pages/</span>
+    </div>
+    <table class="test-table">
+      <thead>
+        <tr><th style="width:40px">ID</th><th style="width:50px">优先级</th><th>测试内容</th><th style="width:70px">类型</th><th>预期结果</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>PS-21</td><td class="p-high">P0</td><td>Health Kit 授权 Toggle 开关</td><td><span class="tag tag-interact">交互</span></td><td>Toggle 可切换，状态变化有响应</td></tr>
+        <tr><td>PS-22</td><td class="p-mid">P1</td><td>设置项列表完整显示</td><td><span class="tag tag-ui">UI</span></td><td>最大心率/周目标/体重/数据导出/关于 5项均可见</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ========== WATCH ========== -->
+<div id="watch" class="section">
+  <div class="section-header">
+    <div class="icon" style="background:#22C55E">⌚</div>
+    <h2>手表端</h2>
+    <span class="count">8 文件 · 25 用例</span>
+  </div>
+
+  <!-- HrZoneRow -->
+  <div class="file-block">
+    <div class="file-header">
+      <span class="badge badge-comp">组件</span>
+      <span class="file-name">HrZoneRow.ets</span>
+      <span class="file-path">watch/src/main/ets/components/</span>
+    </div>
+    <table class="test-table">
+      <thead>
+        <tr><th style="width:40px">ID</th><th style="width:50px">优先级</th><th>测试内容</th><th style="width:70px">类型</th><th>预期结果</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>WK-01</td><td class="p-high">P0</td><td>5 段不同颜色横条渲染</td><td><span class="tag tag-ui">UI</span></td><td>5段颜色 #22C55E/#84CC16/#EAB308/#F97316/#E8453C 按比例显示</td></tr>
+        <tr><td>WK-02</td><td class="p-high">P0</td><td>当前区间高亮</td><td><span class="tag tag-ui">UI</span></td><td>当前区间段亮度/透明度明显高于其他段</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- CircleProgress -->
+  <div class="file-block">
+    <div class="file-header">
+      <span class="badge badge-comp">组件</span>
+      <span class="file-name">CircleProgress.ets</span>
+      <span class="file-path">watch/src/main/ets/components/</span>
+    </div>
+    <table class="test-table">
+      <thead>
+        <tr><th style="width:40px">ID</th><th style="width:50px">优先级</th><th>测试内容</th><th style="width:70px">类型</th><th>预期结果</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>WK-03</td><td class="p-high">P0</td><td>品牌红描边进度环渲染</td><td><span class="tag tag-ui">UI</span></td><td>strokeDasharray 实现进度弧，品牌红 #E8453C</td></tr>
+        <tr><td>WK-04</td><td class="p-mid">P1</td><td>进度 0% 时无弧线</td><td><span class="tag tag-state">状态</span></td><td>progress=0 时圆环为空（仅底色轨道）</td></tr>
+        <tr><td>WK-05</td><td class="p-mid">P1</td><td>进度 100% 时完整圆</td><td><span class="tag tag-state">状态</span></td><td>progress=1.0 时弧线闭合为完整圆</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Index (Watch) -->
+  <div class="file-block">
+    <div class="file-header">
+      <span class="badge badge-page">页面</span>
+      <span class="file-name">Index.ets (手表入口)</span>
+      <span class="file-path">watch/src/main/ets/pages/</span>
+    </div>
+    <table class="test-table">
+      <thead>
+        <tr><th style="width:40px">ID</th><th style="width:50px">优先级</th><th>测试内容</th><th style="width:70px">类型</th><th>预期结果</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>WK-06</td><td class="p-high">P0</td><td>1.5 秒自动跳转 SportSelectPage</td><td><span class="tag tag-nav">导航</span></td><td>页面显示 Logo+品牌名后 1.5s 自动路由跳转</td></tr>
+        <tr><td>WK-07</td><td class="p-mid">P1</td><td>点击也可提前跳转</td><td><span class="tag tag-interact">交互</span></td><td>等待期间点击屏幕立即跳转运动选择页</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- SportSelectPage -->
+  <div class="file-block">
+    <div class="file-header">
+      <span class="badge badge-page">页面</span>
+      <span class="file-name">SportSelectPage.ets</span>
+      <span class="file-path">watch/src/main/ets/pages/</span>
+    </div>
+    <table class="test-table">
+      <thead>
+        <tr><th style="width:40px">ID</th><th style="width:50px">优先级</th><th>测试内容</th><th style="width:70px">类型</th><th>预期结果</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>WK-08</td><td class="p-high">P0</td><td>4 项运动列表完整</td><td><span class="tag tag-ui">UI</span></td><td>户外跑/室内跑/间歇跑/目标跑 4项显示</td></tr>
+        <tr><td>WK-09</td><td class="p-high">P0</td><td>选中项品牌红竖线指示</td><td><span class="tag tag-ui">UI</span></td><td>当前选中运动项左侧显示品牌红竖线</td></tr>
+        <tr><td>WK-10</td><td class="p-high">P0</td><td>开始按钮启动跑步</td><td><span class="tag tag-interact">交互</span></td><td>点击底部品牌红按钮跳转跑步数据页</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- RunningDataPage -->
+  <div class="file-block">
+    <div class="file-header">
+      <span class="badge badge-page">页面</span>
+      <span class="file-name">RunningDataPage.ets</span>
+      <span class="file-path">watch/src/main/ets/pages/</span>
+    </div>
+    <table class="test-table">
+      <thead>
+        <tr><th style="width:40px">ID</th><th style="width:50px">优先级</th><th>测试内容</th><th style="width:70px">类型</th><th>预期结果</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>WK-11</td><td class="p-high">P0</td><td>32px 大字距离 + 3 列小字指标</td><td><span class="tag tag-ui">UI</span></td><td>距离 32px Bold，配速/千卡/心率 3列小字</td></tr>
+        <tr><td>WK-12</td><td class="p-high">P0</td><td>心率区间条 HrZoneRow 正确渲染</td><td><span class="tag tag-ui">UI</span></td><td>5色区间条 + 当前区间高亮</td></tr>
+        <tr><td>WK-13</td><td class="p-high">P0</td><td>左滑切换到心率页</td><td><span class="tag tag-interact">交互</span></td><td>左滑手势触发页面切换到 RunningHeartPage</td></tr>
+        <tr><td>WK-14</td><td class="p-mid">P1</td><td>●○○ 页码指示器显示第1页</td><td><span class="tag tag-ui">UI</span></td><td>3个圆点，第1个实心(品牌红)，其余空心</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- RunningHeartPage -->
+  <div class="file-block">
+    <div class="file-header">
+      <span class="badge badge-page">页面</span>
+      <span class="file-name">RunningHeartPage.ets</span>
+      <span class="file-path">watch/src/main/ets/pages/</span>
+    </div>
+    <table class="test-table">
+      <thead>
+        <tr><th style="width:40px">ID</th><th style="width:50px">优先级</th><th>测试内容</th><th style="width:70px">类型</th><th>预期结果</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>WK-15</td><td class="p-high">P0</td><td>32px 品牌红心率 bpm 显示</td><td><span class="tag tag-ui">UI</span></td><td>心率数字 32px Bold，颜色 #E8453C</td></tr>
+        <tr><td>WK-16</td><td class="p-high">P0</td><td>5 个区间进度条 Z1~Z5</td><td><span class="tag tag-ui">UI</span></td><td>5个带标签进度条（热身/燃脂/有氧/无氧/最大）</td></tr>
+        <tr><td>WK-17</td><td class="p-high">P0</td><td>左右滑动切换页面</td><td><span class="tag tag-interact">交互</span></td><td>左滑→时长页，右滑→数据页</td></tr>
+        <tr><td>WK-18</td><td class="p-mid">P1</td><td>○●○ 页码指示器显示第2页</td><td><span class="tag tag-ui">UI</span></td><td>第2个圆点实心，其余空心</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- RunningTimerPage -->
+  <div class="file-block">
+    <div class="file-header">
+      <span class="badge badge-page">页面</span>
+      <span class="file-name">RunningTimerPage.ets</span>
+      <span class="file-path">watch/src/main/ets/pages/</span>
+    </div>
+    <table class="test-table">
+      <thead>
+        <tr><th style="width:40px">ID</th><th style="width:50px">优先级</th><th>测试内容</th><th style="width:70px">类型</th><th>预期结果</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>WK-19</td><td class="p-high">P0</td><td>32px 大号计时器显示</td><td><span class="tag tag-ui">UI</span></td><td>计时器 32px Bold 显示</td></tr>
+        <tr><td>WK-20</td><td class="p-high">P0</td><td>2×2 宫格指标完整</td><td><span class="tag tag-data">数据</span></td><td>配速/距离/卡路里/步频 4项数据显示</td></tr>
+        <tr><td>WK-21</td><td class="p-high">P0</td><td>结束按钮跳转结果页</td><td><span class="tag tag-interact">交互</span></td><td>点击白色边框结束按钮→RunResultPage</td></tr>
+        <tr><td>WK-22</td><td class="p-mid">P1</td><td>○○● 页码指示器显示第3页</td><td><span class="tag tag-ui">UI</span></td><td>第3个圆点实心，其余空心</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- RunResultPage (Watch) -->
+  <div class="file-block">
+    <div class="file-header">
+      <span class="badge badge-page">页面</span>
+      <span class="file-name">RunResultPage.ets (手表)</span>
+      <span class="file-path">watch/src/main/ets/pages/</span>
+    </div>
+    <table class="test-table">
+      <thead>
+        <tr><th style="width:40px">ID</th><th style="width:50px">优先级</th><th>测试内容</th><th style="width:70px">类型</th><th>预期结果</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>WK-23</td><td class="p-high">P0</td><td>CircleProgress 圆形进度环 + 3列摘要</td><td><span class="tag tag-ui">UI</span></td><td>品牌红进度环 + 时长/配速/心率 3列数据</td></tr>
+        <tr><td>WK-24</td><td class="p-high">P0</td><td>完成按钮返回运动选择</td><td><span class="tag tag-interact">交互</span></td><td>点击品牌红完成按钮→SportSelectPage</td></tr>
+        <tr><td>WK-25</td><td class="p-mid">P1</td><td>同步状态文字显示</td><td><span class="tag tag-data">数据</span></td><td>显示同步状态（同步中/已同步）</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ========== WIDGET ========== -->
+<div id="widget" class="section">
+  <div class="section-header">
+    <div class="icon" style="background:#EAB308">📋</div>
+    <h2>服务卡片</h2>
+    <span class="count">2 文件 · 12 用例</span>
+  </div>
+
+  <!-- WidgetModels -->
+  <div class="file-block">
+    <div class="file-header">
+      <span class="badge badge-model">模型</span>
+      <span class="file-name">WidgetModels.ets</span>
+      <span class="file-path">widget/src/main/ets/model/</span>
+    </div>
+    <table class="test-table">
+      <thead>
+        <tr><th style="width:40px">ID</th><th style="width:50px">优先级</th><th>测试内容</th><th style="width:70px">类型</th><th>预期结果</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>WD-01</td><td class="p-high">P0</td><td>createIdleFormData() 生成空闲态数据</td><td><span class="tag tag-data">数据</span></td><td>返回 state=idle，周进度百分比=0，格式化字段正确</td></tr>
+        <tr><td>WD-02</td><td class="p-high">P0</td><td>createRunningFormData() 生成跑步中数据</td><td><span class="tag tag-data">数据</span></td><td>返回 state=running，距离/心率/配速非空，格式化字段正确</td></tr>
+        <tr><td>WD-03</td><td class="p-high">P0</td><td>createDoneFormData() 生成完成态数据</td><td><span class="tag tag-data">数据</span></td><td>返回 state=done，周进度>0，所有摘要字段非空</td></tr>
+        <tr><td>WD-04</td><td class="p-mid">P1</td><td>buildFormData() 自动计算周进度百分比</td><td><span class="tag tag-func">功能</span></td><td>weeklyDistance/weeklyGoal 正确计算百分比</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- RunTrackerWidget -->
+  <div class="file-block">
+    <div class="file-header">
+      <span class="badge badge-page">页面</span>
+      <span class="file-name">RunTrackerWidget.ets</span>
+      <span class="file-path">widget/src/main/ets/widget/pages/</span>
+    </div>
+    <table class="test-table">
+      <thead>
+        <tr><th style="width:40px">ID</th><th style="width:50px">优先级</th><th>测试内容</th><th style="width:70px">类型</th><th>预期结果</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>WD-05</td><td class="p-high">P0</td><td>onAddForm 生命周期返回 FormBindingData</td><td><span class="tag tag-func">功能</span></td><td>添加卡片时返回有效绑定数据</td></tr>
+        <tr><td>WD-06</td><td class="p-high">P0</td><td>4×1 横条空闲态：开始跑步按钮可见</td><td><span class="tag tag-ui">UI</span></td><td>品牌红按钮"开始跑步"可见，今日跑量+心率占位显示</td></tr>
+        <tr><td>WD-07</td><td class="p-high">P0</td><td>4×1 横条跑步中：品牌红呼吸图标+红色边框</td><td><span class="tag tag-ui">UI</span></td><td>距离/心率品牌红，黑色暂停按钮，红色边框</td></tr>
+        <tr><td>WD-08</td><td class="p-high">P0</td><td>4×1 横条已完成：绿色✓+查看详情</td><td><span class="tag tag-ui">UI</span></td><td>绿色✓图标，今日跑量品牌红，黑色"查看详情"按钮</td></tr>
+        <tr><td>WD-09</td><td class="p-high">P0</td><td>2×2 方块空闲态：空环+品牌红CTA</td><td><span class="tag tag-ui">UI</span></td><td>0km空进度环 + "开始跑步"品牌红按钮</td></tr>
+        <tr><td>WD-10</td><td class="p-high">P0</td><td>2×2 方块跑步中：半环+红色边框</td><td><span class="tag tag-ui">UI</span></td><td>进度环部分填充(品牌红)+配速/心率(红)+暂停按钮+红边框</td></tr>
+        <tr><td>WD-11</td><td class="p-high">P0</td><td>2×2 方块已完成：72%绿环+查看详情</td><td><span class="tag tag-ui">UI</span></td><td>72%绿色进度环 + 用时/心率/消耗 + 品牌红"查看详情"</td></tr>
+        <tr><td>WD-12</td><td class="p-mid">P1</td><td>onUpdateForm 更新卡片数据</td><td><span class="tag tag-func">功能</span></td><td>更新时 FormBindingData 重新生成并推送</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ========== DESIGN SPEC ========== -->
+<div id="design" class="section">
+  <div class="section-header">
+    <div class="icon" style="background:#F97316">🎨</div>
+    <h2>设计规范一致性检查</h2>
+    <span class="count">8 项</span>
+  </div>
+  <div class="file-block">
+    <table class="test-table">
+      <thead>
+        <tr><th style="width:40px">ID</th><th style="width:50px">优先级</th><th>检查项</th><th>标准</th><th>验证方式</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>D-01</td><td class="p-high">P0</td><td>品牌色 #E8453C 使用面积 ≤10%</td><td>品牌红仅用于选中态/活跃指标/CTA按钮</td><td>全页面截图 + 色彩面积统计</td></tr>
+        <tr><td>D-02</td><td class="p-high">P0</td><td>心率5区间颜色一致</td><td>#22C55E / #84CC16 / #EAB308 / #F97316 / #E8453C</td><td>检查所有 HrZoneBar / HrZoneRow 组件颜色值</td></tr>
+        <tr><td>D-03</td><td class="p-high">P0</td><td>圆角规范</td><td>大容器 12px / 小组件 8px</td><td>检查所有 borderRadius 值</td></tr>
+        <tr><td>D-04</td><td class="p-high">P0</td><td>边框规范</td><td>1px #E4E7EC，零阴影</td><td>检查所有 border / boxShadow 属性</td></tr>
+        <tr><td>D-05</td><td class="p-mid">P1</td><td>字阶体系</td><td>大标题 24-48px Bold / 正文 14px / 辅助 12px</td><td>检查所有 fontSize / fontWeight 值</td></tr>
+        <tr><td>D-06</td><td class="p-mid">P1</td><td>间距体系</td><td>4 / 8 / 12 / 16 / 24 / 32 / 48</td><td>检查所有 margin / padding / gap 值</td></tr>
+        <tr><td>D-07</td><td class="p-mid">P1</td><td>文本左对齐</td><td>所有文本和表单元素左对齐</td><td>检查所有 textAlign 值</td></tr>
+        <tr><td>D-08</td><td class="p-mid">P1</td><td>COLORS 常量自包含</td><td>每个文件顶部定义 COLORS，无跨模块 import</td><td>检查所有 .ets 文件头部 + import 语句</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ========== CHECKLIST ========== -->
+<div id="checklist" class="section">
+  <div class="section-header">
+    <div class="icon" style="background:#065F46">✅</div>
+    <h2>验收清单</h2>
+  </div>
+  <div class="file-block">
+    <h3 style="font-size:14px;margin-bottom:8px">📱 手机端</h3>
+    <ul class="checklist">
+      <li><input type="checkbox"> 首页4Tab导航正常切换</li>
+      <li><input type="checkbox"> 开始跑步→跑步中→跑步结果 完整流程</li>
+      <li><input type="checkbox"> 暂停/继续 功能正常</li>
+      <li><input type="checkbox"> 心率区间5色条按比例渲染</li>
+      <li><input type="checkbox"> 记录页 周/月/全部 切换</li>
+      <li><input type="checkbox"> 记录详情 4宫格+区间+分段+轨迹</li>
+      <li><input type="checkbox"> 分析页 周柱状图+趋势图+3指标卡片</li>
+      <li><input type="checkbox"> 我的页 设备+授权+设置项完整</li>
+    </ul>
+  </div>
+  <div class="file-block">
+    <h3 style="font-size:14px;margin-bottom:8px">⌚ 手表端</h3>
+    <ul class="checklist">
+      <li><input type="checkbox"> 入口页 1.5s 自动跳转 + 点击跳转</li>
+      <li><input type="checkbox"> 运动选择 4项 + 选中指示 + 开始</li>
+      <li><input type="checkbox"> 跑步3页左右滑动切换</li>
+      <li><input type="checkbox"> 页码指示器 ●○○ 正确</li>
+      <li><input type="checkbox"> 心率区间条 5色+高亮</li>
+      <li><input type="checkbox"> 圆形进度环正确渲染</li>
+      <li><input type="checkbox"> 结束跑步→结果页 完整</li>
+      <li><input type="checkbox"> 纯黑 #000000 背景</li>
+    </ul>
+  </div>
+  <div class="file-block">
+    <h3 style="font-size:14px;margin-bottom:8px">📋 服务卡片</h3>
+    <ul class="checklist">
+      <li><input type="checkbox"> 4×1 横条 空闲/跑步/完成 三态切换</li>
+      <li><input type="checkbox"> 2×2 方块 空闲/跑步/完成 三态切换</li>
+      <li><input type="checkbox"> FormExtension 生命周期正常</li>
+      <li><input type="checkbox"> 数据绑定 formBindingData 正确传递</li>
+    </ul>
+  </div>
+  <div class="file-block">
+    <h3 style="font-size:14px;margin-bottom:8px">🎨 设计规范</h3>
+    <ul class="checklist">
+      <li><input type="checkbox"> 品牌色面积 ≤ 10%</li>
+      <li><input type="checkbox"> 心率5区间颜色一致</li>
+      <li><input type="checkbox"> 圆角 12/8 规范</li>
+      <li><input type="checkbox"> 边框 1px #E4E7EC / 零阴影</li>
+      <li><input type="checkbox"> 字阶体系正确</li>
+      <li><input type="checkbox"> 间距体系正确</li>
+      <li><input type="checkbox"> 文本左对齐</li>
+      <li><input type="checkbox"> COLORS 自包含无跨模块依赖</li>
+    </ul>
+  </div>
+</div>
+
+</div><!-- /main -->
+
+<script>
+// Smooth scroll for nav
+document.querySelectorAll('.nav a').forEach(a => {
+  a.addEventListener('click', e => {
+    e.preventDefault();
+    const id = a.getAttribute('href').slice(1);
+    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+});
+
+// Checklist persistence
+const checks = document.querySelectorAll('.checklist input[type="checkbox"]');
+const saved = JSON.parse(localStorage.getItem('rt-test-checks') || '{}');
+checks.forEach((cb, i) => {
+  cb.id = `chk-${i}`;
+  if (saved[cb.id]) cb.checked = true;
+  cb.addEventListener('change', () => {
+    const s = JSON.parse(localStorage.getItem('rt-test-checks') || '{}');
+    s[cb.id] = cb.checked;
+    localStorage.setItem('rt-test-checks', JSON.stringify(s));
+  });
+});
+</script>
+
+</body>
+</html>

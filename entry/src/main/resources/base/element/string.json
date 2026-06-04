@@ -1,0 +1,11 @@
+{
+  "string": [
+    { "name": "module_desc", "value": "跑步追踪主模块" },
+    { "name": "ability_desc", "value": "跑步追踪主界面" },
+    { "name": "ability_label", "value": "跑步追踪" },
+    { "name": "location_reason", "value": "用于记录跑步轨迹和计算配速" }
+  ],
+  "color": [
+    { "name": "start_window_background", "value": "#FFFFFF" }
+  ]
+}

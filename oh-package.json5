@@ -1,0 +1,9 @@
+{
+  "name": "runtracker",
+  "version": "1.0.0",
+  "description": "鸿蒙跑步记录追踪工具",
+  "main": "",
+  "author": "",
+  "license": "MIT",
+  "dependencies": {}
+}

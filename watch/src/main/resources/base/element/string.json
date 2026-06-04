@@ -1,0 +1,10 @@
+{
+  "string": [
+    { "name": "module_desc", "value": "跑步追踪手表模块" },
+    { "name": "ability_desc", "value": "跑步追踪手表界面" },
+    { "name": "ability_label", "value": "跑步追踪" }
+  ],
+  "color": [
+    { "name": "start_window_background", "value": "#000000" }
+  ]
+}

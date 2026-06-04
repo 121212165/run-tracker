@@ -1,0 +1,37 @@
+# HarmonyOS / ArkTS project ignore file
+
+# Build output
+build/
+output/
+out/
+dist/
+
+# hvigor
+.hvigor/
+**/oh_modules/
+**/node_modules/
+
+# IDE
+.idea/
+*.iml
+
+# OS
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+
+# Logs
+*.log
+*.hdc
+.hvigor/outputs/
+.hvigor/report/
+**/build/default/
+
+# Environment
+local.properties
+*.local
+
+# Temporary files
+tmp/
+temp/

@@ -1,0 +1,8 @@
+{
+  "string": [
+    { "name": "module_desc", "value": "跑步追踪桌面卡片" },
+    { "name": "widget_desc", "value": "显示跑步数据和快捷操作" },
+    { "name": "widget_label", "value": "跑步追踪" },
+    { "name": "widget_display_name", "value": "跑步追踪" }
+  ]
+}
