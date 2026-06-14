@@ -1,49 +1,40 @@
-// 跑步指标卡片组件
-import { DesignTokens } from '../viewmodel/RunningViewModel'
+import { Theme } from 'common/Index'
 
 @Component
 export struct RunStatCard {
   @Prop label: string = ''
   @Prop value: string = ''
   @Prop unit: string = ''
-  @Prop valueColor: string = DesignTokens.TEXT_PRIMARY
-  private onCardClick?: () => void
 
   build() {
     Column() {
       Text(this.label)
-        .fontSize(DesignTokens.FONT_CAPTION)
-        .fontColor(DesignTokens.TEXT_TERTIARY)
-        .fontWeight(DesignTokens.FONT_WEIGHT_REGULAR)
+        .fontSize(Theme.FONT_CAPTION)
+        .fontColor(Theme.TEXT_TERTIARY)
+        .fontWeight(Theme.FONT_REGULAR)
       Text(this.value)
-        .fontSize(DesignTokens.FONT_TITLE)
-        .fontColor(this.valueColor)
-        .fontWeight(DesignTokens.FONT_WEIGHT_BOLD)
-        .margin({ top: DesignTokens.SPACE_4 })
+        .fontSize(Theme.FONT_TITLE)
+        .fontColor(Theme.TEXT_PRIMARY)
+        .fontWeight(Theme.FONT_BOLD)
+        .margin({ top: Theme.SPACE_4 })
       if (this.unit) {
         Text(this.unit)
-          .fontSize(DesignTokens.FONT_CAPTION)
-          .fontColor(DesignTokens.TEXT_SECONDARY)
-          .fontWeight(DesignTokens.FONT_WEIGHT_REGULAR)
-          .margin({ top: DesignTokens.SPACE_4 })
+          .fontSize(Theme.FONT_CAPTION)
+          .fontColor(Theme.TEXT_SECONDARY)
+          .fontWeight(Theme.FONT_REGULAR)
+          .margin({ top: Theme.SPACE_4 })
       }
     }
-    .padding(DesignTokens.SPACE_16)
-    .borderRadius(DesignTokens.RADIUS_LG)
-    .backgroundColor(DesignTokens.BG)
-    .border({ width: 1, color: DesignTokens.BORDER })
+    .padding(Theme.SPACE_16)
+    .borderRadius(Theme.RADIUS_LG)
+    .backgroundColor(Theme.BG)
+    .border({ width: 1, color: Theme.BORDER })
     .alignItems(HorizontalAlign.Start)
-    .onClick(() => {
-      if (this.onCardClick) {
-        this.onCardClick()
-      }
-    })
   }
 }
 
-// 紧凑型指标卡片（用于跑步中页面 3 列布局）
 @Component
-export struct RunStatCardCompact {
+export struct RunStatCompact {
   @Prop label: string = ''
   @Prop value: string = ''
   @Prop unit: string = ''
@@ -51,23 +42,23 @@ export struct RunStatCardCompact {
   build() {
     Column() {
       Text(this.label)
-        .fontSize(DesignTokens.FONT_CAPTION)
-        .fontColor(DesignTokens.TEXT_TERTIARY)
-        .fontWeight(DesignTokens.FONT_WEIGHT_REGULAR)
+        .fontSize(Theme.FONT_CAPTION)
+        .fontColor(Theme.TEXT_TERTIARY)
+        .fontWeight(Theme.FONT_REGULAR)
       Row() {
         Text(this.value)
           .fontSize(20)
-          .fontColor(DesignTokens.TEXT_PRIMARY)
-          .fontWeight(DesignTokens.FONT_WEIGHT_BOLD)
+          .fontColor(Theme.TEXT_PRIMARY)
+          .fontWeight(Theme.FONT_BOLD)
         if (this.unit) {
           Text(this.unit)
-            .fontSize(DesignTokens.FONT_CAPTION)
-            .fontColor(DesignTokens.TEXT_SECONDARY)
-            .fontWeight(DesignTokens.FONT_WEIGHT_REGULAR)
-            .margin({ left: DesignTokens.SPACE_4 })
+            .fontSize(Theme.FONT_CAPTION)
+            .fontColor(Theme.TEXT_SECONDARY)
+            .fontWeight(Theme.FONT_REGULAR)
+            .margin({ left: Theme.SPACE_4 })
         }
       }
-      .margin({ top: DesignTokens.SPACE_4 })
+      .margin({ top: Theme.SPACE_4 })
       .alignItems(VerticalAlign.Bottom)
     }
     .alignItems(HorizontalAlign.Center)
